@@ -147,12 +147,12 @@ footer a{color:#8e8597}
   <div class="rank-in">
     <div class="logo"><img src="centurion_helmet.svg" alt="Centurion"></div>
     <div class="who">
-      <h1 class="roman">CENTURION <span style="font-size:13px;color:var(--gold2);letter-spacing:.18em">· CLOUD LEGION · <span id="terr">…</span></span></h1>
+      <h1 class="roman">CENTURION <span style="font-size:13px;color:var(--gold2);letter-spacing:.18em">· <span id="legname">CLOUD LEGION</span> · <span id="terr">…</span></span></h1>
       <div class="r"><span class="rname" id="rname">White Belt</span><span class="belt" id="belt"></span><span class="grade" id="grade">6th Kyu</span></div>
       <div class="bar"><span id="rbar"></span></div>
       <div class="next" id="rnext"></div>
       <div class="mood" id="mood"></div>
-      <a class="tbtn" style="text-decoration:none;margin-right:8px" href="https://github.com/OmnisCyber/crittora-centurion/actions/workflows/set-territory.yml" target="_blank" rel="noopener">CHANGE CITY ↗</a><a class="tbtn" style="text-decoration:none;margin-right:8px" href="https://crittora-my.sharepoint.com/personal/chad_centofante_crittora_com/Documents/Centurion%20Reports/Cloud%20Legion" target="_blank" rel="noopener">DAILY REPORTS ↗</a><button class="tbtn" id="tbtn" type="button"><span class="tdot" id="tdot"></span>THE TRIBUNE <span class="tstate" id="tstate">not summoned</span></button>
+      <a class="tbtn" id="legsw" style="text-decoration:none;margin-right:8px" href="?legion=orlando">SWITCH LEGION</a><a class="tbtn" style="text-decoration:none;margin-right:8px" href="https://github.com/OmnisCyber/crittora-centurion/actions/workflows/approve-address.yml" target="_blank" rel="noopener">APPROVE ADDRESSES ↗</a><a class="tbtn" id="relbtn" style="display:none;text-decoration:none;margin-right:8px;background:var(--crimson);color:#fff" href="https://github.com/OmnisCyber/crittora-centurion/actions/workflows/release-envoys.yml" target="_blank" rel="noopener">RELEASE THE ENVOYS ↗</a><a class="tbtn" id="citybtn" style="text-decoration:none;margin-right:8px" href="https://github.com/OmnisCyber/crittora-centurion/actions/workflows/set-territory.yml" target="_blank" rel="noopener">CHANGE CITY ↗</a><a class="tbtn" style="text-decoration:none;margin-right:8px" href="https://crittora-my.sharepoint.com/personal/chad_centofante_crittora_com/Documents/Centurion%20Reports/Cloud%20Legion" target="_blank" rel="noopener">DAILY REPORTS ↗</a><button class="tbtn" id="tbtn" type="button"><span class="tdot" id="tdot"></span>THE TRIBUNE <span class="tstate" id="tstate">not summoned</span></button>
     </div>
     <div class="lvl"><div class="k roman">GRADUS</div><div class="v" id="lvl">I</div><div class="of" id="lvlof">of XVI</div></div>
   </div>
@@ -292,7 +292,7 @@ async function tick(){
 
 const COLS=['rank','fit_score','company','company_type','crittora_segment','city','address','website','phone','contact_name','contact_title','contact_linkedin','fit_rationale','sources','last_verified','in_three_pillar_plan'];
 function terrLabel(B){const T=B.territory||{};return T.city?`${T.city} · ${T.radius_miles||50} mi`:'no city set'}
-function renderTerritory(B){$('terr').textContent=terrLabel(B).toUpperCase();$('lterr').textContent=terrLabel(B).toUpperCase()}
+function renderTerritory(B){$('legname').textContent=LEGION==='orlando'?'ORLANDO LEGION':'CLOUD LEGION';$('legsw').href=LEGION==='orlando'?'?':'?legion=orlando';$('citybtn').style.display=LEGION==='orlando'?'none':'';$('relbtn').style.display=(B.status&&B.status.verdict==='ready')?'':'none';$('terr').textContent=terrLabel(B).toUpperCase();$('lterr').textContent=terrLabel(B).toUpperCase()}
 function renderLeads(B){
   const L=(B.leads||[]).slice().sort((a,b)=>b.fit_score-a.fit_score);
   $('leadsP').style.display='block';
@@ -323,6 +323,8 @@ $('dlpdf').onclick=()=>{const B=window.BUNDLE;if(!B||!window.jspdf){alert('PDF l
     didDrawPage:d=>{doc.setFontSize(8);doc.setTextColor(102,106,112);doc.text('Confidential — Crittora sales prospecting · drafts only, nothing sent automatically',36,doc.internal.pageSize.getHeight()-18)}});
   doc.save(`crittora-prospects-${slug(B.territory&&B.territory.city)}-${today()}.pdf`)};
 
+const LEGION=new URLSearchParams(location.search).get('legion')==='orlando'?'orlando':'cloud';
+const ENC=LEGION==='orlando'?'status-orlando.enc':'status.enc';
 let PASS=null;
 try{PASS=sessionStorage.getItem('centurion_pw')}catch(e){}
 const b64=s=>Uint8Array.from(atob(s.trim()),c=>c.charCodeAt(0));
@@ -339,7 +341,7 @@ async function decrypt(b64text,pass){
 let lastBlob=null,lastData=null;
 async function loadStatus(){
   if(!PASS)throw new Error('locked');
-  const blob=await (await fetch('status.enc?'+Date.now(),{cache:'no-store'})).text();
+  const blob=await (await fetch(ENC+'?'+Date.now(),{cache:'no-store'})).text();
   if(blob===lastBlob&&lastData)return lastData;
   try{const B=await decrypt(blob,PASS);window.BUNDLE=B;lastBlob=blob;
     lastData=B.status||{phase:'No Centurion campaign yet in this territory',updated:B.published||0,started:B.published||0,drafts:[],log:[],trial_names:[]};
@@ -353,7 +355,7 @@ function lock(msg){
 $('gform').onsubmit=async e=>{
   e.preventDefault();const pw=$('gpw').value;if(!pw)return;
   $('gbtn').disabled=true;$('gerr').textContent='';
-  try{const blob=await (await fetch('status.enc?'+Date.now(),{cache:'no-store'})).text();await decrypt(blob,pw);
+  try{const blob=await (await fetch(ENC+'?'+Date.now(),{cache:'no-store'})).text();await decrypt(blob,pw);
     PASS=pw;try{sessionStorage.setItem('centurion_pw',pw)}catch(e){}
     $('gate').classList.remove('open');lastBlob=null;tick();
   }catch(err){$('gerr').textContent='Wrong password.'}
