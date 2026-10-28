@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Centurion</title>
+<link rel="icon" href="centurion_helmet.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --black:#09080c;--panel:#121018;--panel2:#18141f;--line:#2a2333;
+  --purple:#4a0d3f;--purple2:#2b0826;--crimson:#a8161b;--crimson2:#6e0d11;
+  --gold:#d4af37;--gold2:#f0d27a;--marble:#f3efe6;--muted:#a59cad;--laurel:#4f8a4b;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--black);color:var(--marble);font:14px/1.5 Inter,-apple-system,sans-serif;min-height:100vh}
+.roman{font-family:Cinzel,"Trajan Pro",Georgia,serif;letter-spacing:.08em}
+
+/* rank band */
+.rank{position:sticky;top:0;z-index:10;background:linear-gradient(180deg,var(--purple) 0%,var(--purple2) 100%);border-bottom:2px solid var(--gold);box-shadow:0 6px 24px rgba(0,0,0,.5)}
+.rank-in{max-width:1240px;margin:0 auto;padding:14px 16px;display:grid;grid-template-columns:auto 1fr auto;gap:18px;align-items:center}
+.logo{width:72px;height:72px;flex:none}
+.logo img{width:100%;height:100%;display:block}
+.who h1{margin:0;font-size:26px;font-weight:800;color:var(--gold);line-height:1}
+.who .r{margin-top:6px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.who .rname{font-family:Cinzel,Georgia,serif;font-weight:700;font-size:17px;letter-spacing:.05em}
+.who .grade{color:var(--gold2);font-size:13px}
+.belt{width:92px;height:14px;border-radius:2px;position:relative;box-shadow:0 0 0 1px rgba(255,255,255,.18) inset}
+.belt i{position:absolute;top:0;bottom:0;width:3px;background:var(--gold)}
+.bar{margin-top:9px;height:10px;background:rgba(0,0,0,.45);border:1px solid rgba(212,175,55,.45);border-radius:2px;overflow:hidden;max-width:620px}
+.bar>span{display:block;height:100%;width:0;background:var(--gold);transition:width .8s ease}
+.next{margin-top:5px;font-size:12px;color:var(--muted)}
+.mood{margin-top:4px;font-size:13px;font-style:italic;color:var(--marble)}
+.lvl{text-align:center;min-width:120px}
+.lvl .k{font-size:10px;color:var(--gold2);letter-spacing:.2em}
+.lvl .v{font-family:Cinzel,Georgia,serif;font-weight:800;font-size:40px;line-height:1.05;color:var(--gold)}
+.lvl .of{font-size:11px;color:var(--muted)}
+.ladder{max-width:1240px;margin:0 auto;padding:0 16px 12px;display:grid;grid-template-columns:repeat(16,1fr);gap:4px}
+.ladder div{height:6px;border-radius:1px;opacity:.28;position:relative}
+.ladder div.got{opacity:1}
+.ladder div.cur{outline:1px solid var(--gold);outline-offset:2px}
+
+.wrap{max-width:1240px;margin:0 auto;padding:18px 16px 40px}
+.banner{display:none;text-align:center;padding:24px 16px;margin-bottom:14px;font-weight:800;font-size:28px;border-radius:4px}
+.banner.ready{display:block;background:var(--purple);border:2px solid var(--gold);color:var(--gold)}
+.banner.notready{display:block;background:var(--crimson2);border:1px solid var(--crimson);color:var(--marble);font-size:20px}
+.orders{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--gold);padding:12px 16px;margin-bottom:14px}
+.orders .k{font-size:10px;color:var(--gold2);letter-spacing:.2em}
+.orders .now{font-size:17px;margin-top:3px}
+.live{float:right;display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--gold);animation:pulse 1.6s infinite}
+.dot.idle{background:#4a4452;animation:none}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(212,175,55,.6)}70%{box-shadow:0 0 0 9px rgba(212,175,55,0)}100%{box-shadow:0 0 0 0 rgba(212,175,55,0)}}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
+.stat{background:var(--panel);border:1px solid var(--line);padding:12px 16px}
+.stat .k{font-size:10px;color:var(--gold2);letter-spacing:.2em}
+.stat .v{font-family:Cinzel,Georgia,serif;font-size:28px;font-weight:700}
+.stat.ok .v{color:#8fd08a}.stat.bad .v{color:#ff6b6b}
+.cols{display:grid;grid-template-columns:1.55fr 1fr;gap:14px}
+.card{background:var(--panel);border:1px solid var(--line);padding:14px 16px}
+.card h2{margin:0 0 12px;font-size:13px;color:var(--gold);letter-spacing:.2em}
+.envoy{border:1px solid var(--line);background:var(--panel2);padding:12px 14px;margin-bottom:10px}
+.envoy.inspecting{border-color:var(--gold)}
+.envoy.passed{border-left:3px solid var(--laurel)}
+.envoy.failed{border-left:3px solid var(--crimson)}
+.top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.subj{font-weight:600}
+.to{color:var(--muted);font-size:12px}
+.to a{color:var(--gold);text-decoration:none}
+.badge{font-family:Cinzel,Georgia,serif;font-size:10px;font-weight:700;letter-spacing:.12em;padding:4px 8px;white-space:nowrap;border:1px solid}
+.b-waiting{color:var(--muted);border-color:#3a3342}.b-revising{color:var(--gold2);border-color:var(--gold2)}.b-inspecting{color:var(--gold);border-color:var(--gold)}
+.b-passed{color:#8fd08a;border-color:var(--laurel)}.b-failed{color:#ff8a8a;border-color:var(--crimson)}
+.pips{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;margin-top:10px}
+.pip{position:relative;text-align:center;font-family:Cinzel,Georgia,serif;font-size:11px;font-weight:700;padding:6px 0;background:#221c29;color:#6f6678;cursor:default}
+.pip.pass{background:#1f3a22;color:#bfe8b8}.pip.fail{background:var(--crimson);color:#fff}
+.envoy.inspecting .pip.todo{animation:shim 1.2s ease-in-out infinite}
+@keyframes shim{0%,100%{opacity:.5}50%{opacity:1}}
+.pip .tip{display:none;position:absolute;z-index:5;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);width:250px;background:#050407;border:1px solid var(--gold);padding:8px;font:12px/1.4 Inter,sans-serif;color:var(--marble);text-align:left;font-weight:400}
+.pip:hover .tip{display:block}
+.fails{margin:8px 0 0;padding-left:16px;font-size:12px;color:#ffb3b3}
+.log{max-height:640px;overflow:auto;font:12px/1.5 ui-monospace,Menlo,monospace}
+.log div{padding:4px 0;border-bottom:1px solid #1e1925;display:flex;gap:8px}
+.log time{color:var(--muted);flex:none}
+.log .phase{color:var(--gold)}.log .pass{color:#8fd08a}.log .fail{color:#ff8a8a}.log .warn{color:#f0d27a}
+.empty{color:var(--muted);font-size:13px}
+.tbtn{display:inline-flex;align-items:center;gap:10px;margin-top:10px;background:transparent;color:var(--gold);border:1px solid var(--gold);padding:7px 14px;font:700 12px Cinzel,Georgia,serif;letter-spacing:.16em;cursor:pointer}
+.tbtn:hover{background:rgba(212,175,55,.12)}
+.tbtn .tdot{width:8px;height:8px;border-radius:50%;background:#4a4452}
+.tbtn .tdot.on{background:var(--gold);animation:pulse 1.6s infinite}
+.tbtn .tdot.ok{background:#8fd08a}
+.tstate{font:500 11px Inter,sans-serif;letter-spacing:0;color:var(--muted)}
+.modal{display:none;position:fixed;inset:0;z-index:50;background:rgba(5,4,8,.82);overflow:auto;padding:24px 16px}
+.modal.open{display:block}
+.mbox{max-width:860px;margin:0 auto;background:var(--panel);border:1px solid var(--gold)}
+.mimg{position:relative;height:300px;background:#000 center/cover no-repeat}
+.mimg .cap{position:absolute;left:0;right:0;bottom:0;padding:40px 20px 14px;background:linear-gradient(transparent,rgba(9,8,12,.92))}
+.mimg h3{margin:0;font:800 26px Cinzel,Georgia,serif;letter-spacing:.1em;color:var(--gold)}
+.mimg .sub2{color:var(--marble);font-size:13px}
+.mclose{position:absolute;top:10px;right:10px;background:rgba(9,8,12,.7);color:var(--marble);border:1px solid var(--line);font:600 13px Inter,sans-serif;padding:6px 10px;cursor:pointer}
+.mbody{padding:18px 20px 22px}
+.msec{margin-bottom:18px}
+.msec h4{margin:0 0 8px;font:700 12px Cinzel,Georgia,serif;letter-spacing:.2em;color:var(--gold)}
+.mnow{background:var(--purple2);border-left:3px solid var(--gold);padding:12px 14px;font-size:15px;line-height:1.6}
+.rul{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+.rul b.a{color:#8fd08a}.rul b.r{color:#ff8a8a}
+.tl{list-style:none;margin:0;padding:0;counter-reset:n}
+.tl li{position:relative;padding:8px 0 8px 70px;border-bottom:1px solid #1e1925;font-size:14px;line-height:1.55}
+.tl li time{position:absolute;left:0;top:9px;color:var(--muted);font:12px ui-monospace,Menlo,monospace}
+.tl li.pass{color:#cfeec9}.tl li.fail{color:#ffc2c2}.tl li.phase{color:var(--gold2)}
+.credit{color:#6f6678;font-size:11px;margin-top:14px}
+.xch{background:var(--panel);border:1px solid var(--line);padding:14px 16px;margin-bottom:14px}
+.xch h2{margin:0 0 4px;font-size:13px;color:var(--gold);letter-spacing:.2em}
+.xsum{color:var(--muted);font-size:13px;margin-bottom:10px}
+.xsum b{color:var(--marble)}
+.xr{display:grid;grid-template-columns:86px 1fr auto;gap:12px;align-items:center;padding:7px 0;border-top:1px solid #1e1925;font-size:13px}
+.xr .rn{font:700 12px Cinzel,Georgia,serif;letter-spacing:.12em;color:var(--gold2)}
+.xr .chips{display:flex;flex-wrap:wrap;gap:4px}
+.chip{font-size:11px;padding:3px 7px;border:1px solid #3a3342;color:var(--muted)}
+.chip.a{border-color:var(--laurel);color:#bfe8b8;background:#16271a}
+.chip.r{border-color:var(--crimson);color:#ffc9c9;background:#2a0d10}
+.xr .res{color:var(--muted);white-space:nowrap}
+.hist{display:flex;gap:4px;flex-wrap:wrap;margin-top:8px}
+.b-approved{color:#8fd08a;border-color:var(--laurel)}
+.gate{display:none;position:fixed;inset:0;z-index:100;background:var(--black);align-items:center;justify-content:center;padding:16px}
+.gate.open{display:flex}
+.gbox{width:100%;max-width:380px;background:var(--panel);border:1px solid var(--gold);padding:28px 24px;text-align:center}
+.gbox img{width:84px;height:84px}
+.gbox h2{margin:8px 0 4px;font:800 24px Cinzel,Georgia,serif;letter-spacing:.12em;color:var(--gold)}
+.gbox p{margin:0 0 18px;color:var(--muted);font-size:13px}
+.gbox input{width:100%;padding:11px 12px;background:#0d0b12;border:1px solid var(--line);color:var(--marble);font:15px Inter,sans-serif}
+.gbox input:focus{outline:none;border-color:var(--gold)}
+.gbox button{width:100%;margin-top:12px;padding:11px;background:var(--gold);color:#0b0a10;border:0;font:700 13px Cinzel,Georgia,serif;letter-spacing:.16em;cursor:pointer}
+.gerr{min-height:18px;margin-top:10px;color:#ff8a8a;font-size:13px}
+.lout{float:right;margin-left:12px;background:transparent;border:1px solid var(--line);color:var(--muted);font:12px Inter,sans-serif;padding:3px 8px;cursor:pointer}
+.lt{width:100%;border-collapse:collapse;font-size:13px}
+.lt th{text-align:left;color:var(--gold2);font:600 10px Cinzel,Georgia,serif;letter-spacing:.14em;padding:6px 8px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--panel)}
+.lt td{padding:7px 8px;border-bottom:1px solid #1e1925;vertical-align:top}
+.lt .sc{font-weight:700;color:var(--gold)}
+footer{margin-top:22px;color:#6f6678;font-size:11px;text-align:center}
+footer a{color:#8e8597}
+@media (max-width:900px){.rank-in{grid-template-columns:auto 1fr}.lvl{grid-column:1/-1;text-align:left;display:flex;gap:10px;align-items:baseline}.stats{grid-template-columns:repeat(2,1fr)}.cols{grid-template-columns:1fr}.pip .tip{width:200px}}
+</style>
+</head>
+<body>
+<div class="rank">
+  <div class="rank-in">
+    <div class="logo"><img src="centurion_helmet.svg" alt="Centurion"></div>
+    <div class="who">
+      <h1 class="roman">CENTURION <span style="font-size:13px;color:var(--gold2);letter-spacing:.18em">· CLOUD LEGION · <span id="terr">…</span></span></h1>
+      <div class="r"><span class="rname" id="rname">White Belt</span><span class="belt" id="belt"></span><span class="grade" id="grade">6th Kyu</span></div>
+      <div class="bar"><span id="rbar"></span></div>
+      <div class="next" id="rnext"></div>
+      <div class="mood" id="mood"></div>
+      <a class="tbtn" style="text-decoration:none;margin-right:8px" href="https://github.com/OmnisCyber/crittora-centurion/actions/workflows/set-territory.yml" target="_blank" rel="noopener">CHANGE CITY ↗</a><a class="tbtn" style="text-decoration:none;margin-right:8px" href="https://crittora-my.sharepoint.com/personal/chad_centofante_crittora_com/Documents/Centurion%20Reports/Cloud%20Legion" target="_blank" rel="noopener">DAILY REPORTS ↗</a><button class="tbtn" id="tbtn" type="button"><span class="tdot" id="tdot"></span>THE TRIBUNE <span class="tstate" id="tstate">not summoned</span></button>
+    </div>
+    <div class="lvl"><div class="k roman">GRADUS</div><div class="v" id="lvl">I</div><div class="of" id="lvlof">of XVI</div></div>
+  </div>
+  <div class="ladder" id="ladder"></div>
+</div>
+
+<div class="wrap">
+  <div class="banner roman" id="banner"></div>
+  <div class="orders"><span class="live"><span class="dot" id="dot"></span><span id="upd">awaiting orders</span></span>
+    <button class="lout" id="lout" type="button">Log out</button><div class="k roman">CURRENT ORDERS</div><div class="now" id="phase">—</div></div>
+  <div class="stats">
+    <div class="stat"><div class="k roman">ENVOYS</div><div class="v" id="n">0</div></div>
+    <div class="stat"><div class="k roman">TRIALS HELD</div><div class="v" id="t">0</div></div>
+    <div class="stat ok"><div class="k roman">PROBATA</div><div class="v" id="p">0</div></div>
+    <div class="stat bad"><div class="k roman">REPROBATA</div><div class="v" id="r">0</div></div>
+  </div>
+  <div class="xch" id="leadsP" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+      <h2 class="roman" style="margin:0">PROSPECT LIST · <span id="lterr"></span></h2>
+      <div><button class="tbtn" id="dlcsv" type="button" style="margin:0 6px 0 0">DOWNLOAD CSV</button><button class="tbtn" id="dlpdf" type="button" style="margin:0">DOWNLOAD PDF</button></div>
+    </div>
+    <div class="xsum" id="lsum" style="margin-top:8px"></div>
+    <div style="max-height:420px;overflow:auto"><table class="lt"><thead><tr><th>#</th><th>Score</th><th>Company</th><th>City</th><th>Contact</th><th>Segment</th></tr></thead><tbody id="lrows"></tbody></table></div>
+  </div>
+  <div class="xch" id="xch" style="display:none">
+    <h2 class="roman">CENTURION ⇄ TRIBUNE</h2>
+    <div class="xsum" id="xsum"></div>
+    <div id="xrows"></div>
+  </div>
+  <div class="cols">
+    <div class="card"><h2 class="roman">THE ENVOYS</h2><div id="envoys"><div class="empty">No envoys mustered yet.</div></div></div>
+    <div class="card"><h2 class="roman">TABULA · FIELD LOG</h2><div class="log" id="log"></div></div>
+  </div>
+  <footer>Helmet icon by Delapouite, <a href="https://game-icons.net/1x1/delapouite/centurion-helmet.html" target="_blank" rel="noopener">game-icons.net</a>, CC BY 3.0</footer>
+</div>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="mt">
+  <div class="mbox">
+    <div class="mimg" style="background-image:url('tribune.jpg')">
+      <button class="mclose" id="mclose" type="button">Close ✕</button>
+      <div class="cap"><h3 id="mt">THE TRIBUNE</h3><div class="sub2" id="msub">Independent review of the Centurion's corrections. He never edits a draft; he only rules.</div></div>
+    </div>
+    <div class="mbody">
+      <div class="msec"><h4>RIGHT NOW</h4><div class="mnow" id="mnow">The Tribune has not been summoned yet.</div></div>
+      <div class="msec"><h4>RULINGS</h4><div id="mrul"><div class="empty">No rulings yet.</div></div></div>
+      <div class="msec"><h4 id="mtlh">EVERYTHING SINCE THE CENTURION SUMMONED HIM</h4><ol class="tl" id="mtl"></ol></div>
+      <div class="credit">Painting: Lawrence Alma-Tadema, <i>A Roman Art Lover</i> (1870), public domain, via Wikimedia Commons.</div>
+    </div>
+  </div>
+</div>
+<div class="gate" id="gate"><form class="gbox" id="gform" autocomplete="on">
+  <img src="centurion_helmet.svg" alt=""><h2>CENTURION</h2><p>Enter the password to view the campaign.</p>
+  <input type="password" id="gpw" name="password" autocomplete="current-password" placeholder="Password" aria-label="Password">
+  <button type="submit" id="gbtn">ENTER</button><div class="gerr" id="gerr" role="alert"></div>
+</form></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const NUM=["I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII","XIII","XIV","XV","XVI"];
+const fmt=t=>new Date(t*1000).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+const LABEL={approved:"TRIBUNE APPROVED",revising:"CENTURION REVISING",waiting:"AWAITING",inspecting:"UNDER INSPECTION",passed:"PROBATUM",failed:"REPROBATUM"};
+const BELT={white:"#f3efe6",yellow:"#e8c22e",orange:"#e0772a",green:"#2f7d4f",blue:"#2457b5",brown:"#5c3a21",
+  red:"#a8161b",redwhite:"repeating-linear-gradient(90deg,#a8161b 0 10px,#f3efe6 10px 20px)"};
+function beltCss(b){return b.startsWith('black')?'#050505':(BELT[b]||'#888')}
+function beltHtml(b){const n=b.startsWith('black')?+b.slice(5):0;let s='';for(let i=0;i<n;i++)s+=`<i style="right:${8+i*6}px"></i>`;return s}
+function rankUI(k){
+  if(!k)return;
+  $('rname').textContent=k.name;$('grade').textContent=k.grade;
+  const b=$('belt');b.style.background=beltCss(k.belt);b.innerHTML=beltHtml(k.belt);
+  $('lvl').textContent=NUM[k.level-1]||k.level;$('lvlof').textContent='of '+NUM[k.levels-1];
+  $('rbar').style.width=Math.round(k.progress*100)+'%';
+  $('rnext').textContent=k.next?`${k.batches} flawless batch${k.batches==1?'':'es'} · next: ${k.next.name}, ${k.next.grade} at ${k.next.need}`:`${k.batches} flawless batches · highest rank attained`;
+  $('mood').textContent=k.mood;
+  $('ladder').innerHTML=k.ladder.map((r,i)=>`<div class="${i<k.level?'got':''} ${i==k.level-1?'cur':''}" title="${esc(r.name+' · '+r.grade+' · '+r.need+' batches')}" style="background:${beltCss(r.belt)}"></div>`).join('');
+}
+const modal=$('modal');
+$('tbtn').onclick=()=>{modal.classList.add('open');tick()};
+$('mclose').onclick=()=>modal.classList.remove('open');
+modal.onclick=e=>{if(e.target===modal)modal.classList.remove('open')};
+document.addEventListener('keydown',e=>{if(e.key==='Escape')modal.classList.remove('open')});
+const dt=t=>new Date(t*1000).toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+function tribuneUI(tb){
+  const dot=$('tdot'),st=$('tstate');
+  if(!tb){dot.className='tdot';st.textContent='not summoned';return}
+  const R=Object.values(tb.rulings||{});const ok=R.filter(r=>r.verdict==='approve').length;
+  dot.className='tdot '+(tb.state==='deliberating'?'on':(R.length&&ok===R.length?'ok':''));
+  st.textContent=tb.state==='deliberating'?'deliberating…':(R.length?`${ok}/${R.length} approved`:tb.state);
+  $('msub').textContent=`Summoned by the Centurion ${dt(tb.invoked)}${tb.purpose?' to '+tb.purpose.replace(/^to /i,''):''}. He never edits a draft; he only rules.`;
+  $('mnow').textContent=tb.now||'—';
+  $('mrul').innerHTML=R.length?R.map(r=>`<div class="rul"><b class="${r.verdict==='approve'?'a':'r'}">${r.verdict==='approve'?'APPROVED':'REJECTED'}</b><div><div>${esc(r.subject)} <span class="tstate">· round ${r.round}</span></div><div class="tstate" style="font-size:13px">${esc(r.notes)}</div></div></div>`).join(''):'<div class="empty">No rulings yet.</div>';
+  $('mtlh').textContent=`EVERYTHING SINCE THE CENTURION SUMMONED HIM (${dt(tb.invoked)})`;
+  $('mtl').innerHTML=(tb.events||[]).map(e=>`<li class="${e.kind}"><time>${fmt(e.t).slice(0,5)}</time>${esc(e.msg)}</li>`).join('');
+}
+function exchangeUI(s){
+  const R=s.rounds||[],D=s.drafts||[];
+  if(!R.length){$('xch').style.display='none';return}
+  $('xch').style.display='block';
+  const approved=D.filter(d=>d.tribune&&d.tribune.verdict==='approve').length;
+  const sent=R.reduce((n,r)=>n+r.submitted.length,0);
+  $('xsum').innerHTML=`Tribune summoned <b>${R.length}</b> time${R.length==1?'':'s'} · <b>${sent}</b> draft reviews · <b>${approved}/${D.length}</b> drafts approved and locked. Each round sends only the drafts he rejected last time.`;
+  $('xrows').innerHTML=R.slice().reverse().map(r=>{
+    const pending=r.submitted.filter(k=>!r.approved.includes(k)&&!r.rejected.includes(k));
+    const chips=r.submitted.map(k=>`<span class="chip ${r.approved.includes(k)?'a':r.rejected.includes(k)?'r':''}">${esc(k)}</span>`).join('');
+    const res=r.ended||!pending.length?`${r.approved.length} approved · ${r.rejected.length} sent back`:`deliberating · ${pending.length} pending`;
+    return `<div class="xr"><span class="rn">ROUND ${NUM[r.n-1]||r.n}</span><span class="chips">${chips}</span><span class="res">${res}</span></div>`}).join('');
+}
+async function tick(){
+  let s;try{s=await loadStatus()}catch(e){if(e&&e.badPass)lock('Wrong password.');return}
+  rankUI(s.rank);tribuneUI(s.tribune);exchangeUI(s);
+  const names=s.trial_names||[];
+  const active=(Date.now()/1000-s.updated)<120&&!s.verdict;
+  $('dot').className='dot'+(active?'':' idle');
+  $('upd').textContent=((Date.now()/1000-s.updated)<180&&!s.verdict?'in the field · ':'')+'updated '+fmt(s.updated);
+  $('phase').textContent=s.phase;
+  const D=s.drafts||[];let held=0;D.forEach(d=>held+=Object.keys(d.trials).length);
+  $('n').textContent=D.length;$('t').textContent=held;
+  $('p').textContent=D.filter(d=>d.state==='passed').length;$('r').textContent=D.filter(d=>d.state==='failed').length;
+  const b=$('banner');
+  if(s.verdict==='ready'){b.className='banner roman ready';b.textContent='Domine, your envoys are ready for dispatch.'}
+  else if(s.verdict==='notready'){b.className='banner roman notready';b.textContent=s.verdict_text||'The envoys are not fit to march.'}
+  else{b.className='banner roman';b.textContent=''}
+  if(D.length)$('envoys').innerHTML=D.map(d=>{
+    const fails=Object.entries(d.trials).filter(([k,v])=>v.r==='fail').sort((a,b)=>a[0]-b[0]);
+    return `<div class="envoy ${d.state}"><div class="top"><div><div class="subj">${esc(d.subject)}</div>
+      <div class="to">${d.to?'To: '+esc(d.to):'No recipient set'}${d.link?` · <a href="${esc(d.link)}" target="_blank" rel="noopener">open in Outlook ↗</a>`:''}</div></div>
+      <span class="badge b-${d.state}">${LABEL[d.state]||d.state}</span></div>
+      <div class="pips">${NUM.slice(0,10).map((n,i)=>{const t=d.trials[i+1];const c=t?t.r:'todo';
+        return `<div class="pip ${c}">${n}<div class="tip"><b>${n} · ${esc(names[i]||'')}</b><br>${t?(t.r==='pass'?'PROBATUM':'REPROBATUM')+' — '+esc(t.reason):'Not yet tried'}</div></div>`}).join('')}</div>
+      ${(d.history||[]).length?`<div class="hist">${d.history.map(h=>`<span class="chip ${h.verdict==='approve'?'a':'r'}" title="${esc(h.notes)}">Tribune R${h.round}: ${h.verdict==='approve'?'approved':'sent back'}</span>`).join('')}</div>`:''}
+      ${fails.length?`<ul class="fails">${fails.map(([k,v])=>`<li><b>${NUM[k-1]} ${esc(names[k-1]||'')}:</b> ${esc(v.reason)}</li>`).join('')}</ul>`:''}
+    </div>`}).join('');
+  $('log').innerHTML=(s.log||[]).slice().reverse().map(e=>`<div><time>${fmt(e.t)}</time><span class="${e.kind}">${esc(e.msg)}</span></div>`).join('');
+}
+
+
+const COLS=['rank','fit_score','company','company_type','crittora_segment','city','address','website','phone','contact_name','contact_title','contact_linkedin','fit_rationale','sources','last_verified','in_three_pillar_plan'];
+function terrLabel(B){const T=B.territory||{};return T.city?`${T.city} · ${T.radius_miles||50} mi`:'no city set'}
+function renderTerritory(B){$('terr').textContent=terrLabel(B).toUpperCase();$('lterr').textContent=terrLabel(B).toUpperCase()}
+function renderLeads(B){
+  const L=(B.leads||[]).slice().sort((a,b)=>b.fit_score-a.fit_score);
+  $('leadsP').style.display='block';
+  const hi=L.filter(r=>+r.fit_score>=80).length;
+  $('lsum').innerHTML=L.length?`<b>${L.length}</b> prospects · <b>${hi}</b> scoring 80+ · territory set ${B.territory&&B.territory.set_at?new Date(B.territory.set_at).toLocaleDateString():'—'}`:'No prospects yet for this territory. The cloud lead agent builds the list on its next hourly run.';
+  $('lrows').innerHTML=L.map(r=>`<tr><td>${esc(r.rank)}</td><td class="sc">${esc(r.fit_score)}</td><td>${r.website?`<a style="color:var(--marble)" href="${esc(r.website)}" target="_blank" rel="noopener">${esc(r.company)}</a>`:esc(r.company)}</td><td>${esc(r.city)}</td><td>${esc(r.contact_name)}${r.contact_title?`<div class="tstate">${esc(r.contact_title)}</div>`:''}</td><td>${esc(r.crittora_segment)}</td></tr>`).join('');
+}
+const slug=s=>String(s||'territory').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+const today=()=>new Date().toISOString().slice(0,10);
+function save(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500)}
+$('dlcsv').onclick=()=>{const B=window.BUNDLE;if(!B)return;
+  const q=v=>{v=String(v??'');return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
+  const csv=[COLS.join(',')].concat((B.leads||[]).map(r=>COLS.map(c=>q(r[c])).join(','))).join('\n');
+  save(new Blob([csv],{type:'text/csv'}),`crittora-prospects-${slug(B.territory&&B.territory.city)}-${today()}.csv`)};
+$('dlpdf').onclick=()=>{const B=window.BUNDLE;if(!B||!window.jspdf){alert('PDF library did not load; try again.');return}
+  const {jsPDF}=window.jspdf;const doc=new jsPDF({orientation:'landscape',unit:'pt',format:'letter'});
+  const W=doc.internal.pageSize.getWidth();
+  doc.setFillColor(5,7,10);doc.rect(0,0,W,70,'F');doc.setFillColor(0,138,255);doc.rect(0,70,W,3,'F');
+  doc.setTextColor(255,255,255);doc.setFont('helvetica','bold');doc.setFontSize(18);doc.text('Crittora · Prospect List',36,32);
+  doc.setFont('helvetica','normal');doc.setFontSize(11);doc.setTextColor(170,178,191);
+  doc.text(`${terrLabel(B)} · generated ${new Date().toLocaleString()} · Cloud Legion`,36,52);
+  const L=(B.leads||[]).slice().sort((a,b)=>b.fit_score-a.fit_score);
+  doc.autoTable({startY:90,head:[['#','Score','Company','City','Contact','Title','Segment','Why they fit']],
+    body:L.map(r=>[r.rank,r.fit_score,r.company,r.city,r.contact_name,r.contact_title,r.crittora_segment,r.fit_rationale]),
+    styles:{fontSize:7.5,cellPadding:4,textColor:[17,21,27],lineColor:[237,241,244],lineWidth:.5},
+    headStyles:{fillColor:[17,21,27],textColor:[255,255,255],fontStyle:'bold'},alternateRowStyles:{fillColor:[245,247,250]},
+    columnStyles:{0:{cellWidth:22},1:{cellWidth:34,textColor:[0,104,189],fontStyle:'bold'},7:{cellWidth:230}},
+    didDrawPage:d=>{doc.setFontSize(8);doc.setTextColor(102,106,112);doc.text('Confidential — Crittora sales prospecting · drafts only, nothing sent automatically',36,doc.internal.pageSize.getHeight()-18)}});
+  doc.save(`crittora-prospects-${slug(B.territory&&B.territory.city)}-${today()}.pdf`)};
+
+let PASS=null;
+try{PASS=sessionStorage.getItem('centurion_pw')}catch(e){}
+const b64=s=>Uint8Array.from(atob(s.trim()),c=>c.charCodeAt(0));
+async function decrypt(b64text,pass){
+  const raw=b64(b64text);
+  if(new TextDecoder().decode(raw.slice(0,8))!=='Salted__')throw new Error('format');
+  const salt=raw.slice(8,16),ct=raw.slice(16);
+  const base=await crypto.subtle.importKey('raw',new TextEncoder().encode(pass),'PBKDF2',false,['deriveBits']);
+  const bits=new Uint8Array(await crypto.subtle.deriveBits({name:'PBKDF2',hash:'SHA-256',salt,iterations:250000},base,384));
+  const key=await crypto.subtle.importKey('raw',bits.slice(0,32),'AES-CBC',false,['decrypt']);
+  const pt=await crypto.subtle.decrypt({name:'AES-CBC',iv:bits.slice(32,48)},key,ct);
+  return JSON.parse(new TextDecoder().decode(pt));
+}
+let lastBlob=null,lastData=null;
+async function loadStatus(){
+  if(!PASS)throw new Error('locked');
+  const blob=await (await fetch('status.enc?'+Date.now(),{cache:'no-store'})).text();
+  if(blob===lastBlob&&lastData)return lastData;
+  try{const B=await decrypt(blob,PASS);window.BUNDLE=B;lastBlob=blob;
+    lastData=B.status||{phase:'No Centurion campaign yet in this territory',updated:B.published||0,started:B.published||0,drafts:[],log:[],trial_names:[]};
+    renderTerritory(B);renderLeads(B);return lastData}
+  catch(e){const err=new Error('bad');err.badPass=true;throw err}
+}
+function lock(msg){
+  PASS=null;try{sessionStorage.removeItem('centurion_pw')}catch(e){}
+  $('gate').classList.add('open');$('gerr').textContent=msg||'';$('gpw').value='';$('gpw').focus();
+}
+$('gform').onsubmit=async e=>{
+  e.preventDefault();const pw=$('gpw').value;if(!pw)return;
+  $('gbtn').disabled=true;$('gerr').textContent='';
+  try{const blob=await (await fetch('status.enc?'+Date.now(),{cache:'no-store'})).text();await decrypt(blob,pw);
+    PASS=pw;try{sessionStorage.setItem('centurion_pw',pw)}catch(e){}
+    $('gate').classList.remove('open');lastBlob=null;tick();
+  }catch(err){$('gerr').textContent='Wrong password.'}
+  $('gbtn').disabled=false;
+};
+$('lout').onclick=()=>{lock('');};
+if(!PASS)lock('');
+tick();setInterval(tick,10000);
+</script>
+</body>
+</html>
